@@ -291,7 +291,8 @@ class StackedXPSData(object):
 
         # the legend
         if legend:
-            axis[0].legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
+            axis[0].legend(loc='upper right', borderaxespad=0.,
+                           fontsize=18, bbox_to_anchor=(1.1, 1.3),)
 
         fig.suptitle(self.title)
 
@@ -300,7 +301,7 @@ class StackedXPSData(object):
             axis[0].axvline(x=p, ymin=-(len(self.xpsData) - 1), ymax=1.1, c="#555753",
                             linewidth=2, clip_on=False)
             ymin, ymax = axis[0].get_ylim()
-            axis[0].text(x=p, y=1.15 * ymax, s="{:5.1f}".format(p), fontsize=12,
+            axis[0].text(x=p, y=1.12 * ymax, s="{:5.1f}".format(p), fontsize=12,
                          horizontalalignment='center')
 
         return fig

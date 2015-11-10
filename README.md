@@ -19,20 +19,21 @@ another.
 This is example.py file in order to plot a single XPS data file
 
 ```python
-
 import xpsplot
 
 report1 = xpsplot.XPSData.from_file("report1.TXT")
 
-report1.rename("Comp_1", "carb")
-report1.rename("Comp_3", "carbonyle")
-report1.rename("Comp_4", "tata")
-report1.rename("Comp_5", "titi")
-report1.rename("Comp_6", "toto")
-report1.rename("Comp_7", "tutu")
+report1.set_column_name("Comp_1", "carb")
+report1.set_column_name("Comp_3", "carbonyle")
+report1.set_column_name("Comp_4", "tata")
+report1.set_column_name("Comp_5", "titi")
+report1.set_column_name("Comp_6", "toto")
+report1.set_column_name("Comp_7", "tutu")
 
-report1.save_plot("report1.png", columns=["Exp", "carb", "titi", "tutu"],
-                  fill=True, fname=False)
+report1.save_plot("report1.png",                                # picture name
+                  columns=["Exp", "carb", "titi", "tutu"],      # column to plot
+                  fill=True,                                    # fill component
+                  fname=False)                                  # do not write file name
 ```
 
 this is the output on `report1.png` file :
@@ -49,10 +50,14 @@ import xpsplot
 stuff = xpsplot.StackedXPSData("report1.TXT", "report2.TXT", "report2.TXT")
 
 stuff.title = "C1s of a nice surface"
+
+# set column names. If "", column name is keep unchanged
 stuff.set_all_column_names("", "", "carb", "", "", "tata", "toto", "titi", "tutu", "", "")
 
-stuff.save_plot("stack.png", columns=["Exp", "carb", "titi", "tutu"], fill=True,
-                pos=[284.5, 290.9, 286.5])
+stuff.save_plot("stack.png",                               # picture name
+                columns=["Exp", "carb", "titi", "tutu"],   # column to plot
+                fill=True,                                 # fill component
+                pos=[284.5, 290.9, 286.5])                 # vertical line positions
 ```
 
 this is the output on `stack.png` file :
