@@ -87,13 +87,10 @@ class XPSData(object):
 
     def set_all_column_names(self, *args):
         """
-        Rename all columns in one shot. You must give a name for
-        all columns. If you give "", the column name is not changed.
+        Rename all columns in one shot. If you do not want to rename a column,
+        pass "" as argument. The column names are changed from the first column
+        to the last depending on how many names you give as arguments.
         """
-        if len(args) != len(self.data.columns):
-            raise ValueError("You must give all columns name.\n" +
-                             "There are {} columns.\n".format(len(self.data.columns)) +
-                             "You gave : {}".format(args))
         for new, old in zip(args, self.data.columns):
             if new != "":
                 self.set_column_name(old, new)
