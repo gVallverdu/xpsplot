@@ -1,4 +1,4 @@
-e:\ytison\documents\recherche\kalpha\mg-ionmtp-2015\bisb-electrolyte\x-ray005 400um - fg  on\sb-electrolyte-1\avg\sb-electrodemouilleev2.vms
+/home/user/work/kalpha/compounds/data2.vms
 C1s Scan
 	Characteristic Energy eV	1486.68	Acquisition Time s	2.5
 KE_C1s Scan	BE_C1s Scan	CPS_C1s Scan	C 1s_1_C1s Scan	C 1s_2_C1s Scan	C 1s_3_C1s Scan	C 1s_4_C1s Scan	C 1s_5_C1s Scan	C1s_6_C1s Scan	C1s_7_C1s Scan	Background_C1s Scan	Envelope_C1s Scan

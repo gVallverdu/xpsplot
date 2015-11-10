@@ -1,4 +1,4 @@
-e:\ytison\documents\recherche\kalpha\mg-ionmtp-2015\bisb-brut\x-ray009 400um - fg  on\point 1 sb5bi5\avg\bi50sb50 electrode_v5.vms
+/home/user/work/kalpha/compounds/data.vms
 C1s Scan
 	Characteristic Energy eV	1486.68	Acquisition Time s	2.5
 KE_C1s Scan	BE_C1s Scan	CPS_C1s Scan	C 1s_1_C1s Scan	C 1s_2_C1s Scan	C 1s_3_C1s Scan	C 1s_4_C1s Scan	C 1s_5_C1s Scan	C 1s_6_C1s Scan	C1s_7_C1s Scan	Background_C1s Scan	Envelope_C1s Scan
