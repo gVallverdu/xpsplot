@@ -108,6 +108,7 @@ class XPSData(object):
             legend: if True, the legend is present
             fname: if True, the name of the data file is written
         """
+        # check column names
         if columns:
             for c in columns:
                 if c not in self.data.columns:
@@ -122,26 +123,35 @@ class XPSData(object):
             fig = plt.figure(figsize=SIZE)
             ax = fig.add_subplot(111)
 
+        # add plots
         for i, col in enumerate(columns):
             color = COLORS[i % len(COLORS)]
-            if fill and "BG" in self.data.columns and col != "Exp":
-                ax.fill_between(self.data.index, self.data.BG, self.data[col],
-                                alpha=ALPHA, color=color)
-            ax.plot(self.data.index, self.data[col], linewidth=LINEWIDTH,
-                    c=color, label=col)
+            if col == "envelope":
+                ax.plot(self.data.index, self.data.envelope,
+                        linewidth=1, c="black", label="")
+            elif col == "Exp":
+                ax.plot(self.data.index, self.data.Exp, c="black", linestyle="",
+                        label="Exp", marker="o", markersize=4.)
+            else:
+                if fill and "BG" in self.data.columns:
+                    ax.fill_between(self.data.index, self.data.BG,
+                                    self.data[col], alpha=ALPHA, color=color)
+                else:
+                    ax.plot(self.data.index, self.data[col], linewidth=LINEWIDTH,
+                            c=color, label=col)
 
         # plot options :
         #   * remove frame
-        #   * remove y axis
-        #   * draw x axes
         ax.set_frame_on(False)
+        #   * remove y axis
         if fname:
             ax.set_yticks([])
             ax.set_ylabel(self.filename, fontsize=10)
         else:
             ax.get_yaxis().set_visible(False)
-        ax.grid(GRID)
-        ax.set_xlim((self.data.index.min(), self.data.index.max()))
+        #   * revert x axes
+        ax.set_xlim((self.data.index.max(), self.data.index.min()))
+        #   * draw x axes
         if xaxes:
             ymin, ymax = ax.get_ylim()
             xmin, xmax = ax.get_xlim()
@@ -151,7 +161,9 @@ class XPSData(object):
                                                 color="black", linewidth=5.))
         else:
             ax.get_xaxis().set_visible(False)
-
+        #   * add grid
+        ax.grid(GRID)
+        #   * add legend
         if legend:
             ax.legend()
 

@@ -13,7 +13,7 @@ report1.set_column_name("Comp_5", "titi")
 report1.set_column_name("Comp_6", "toto")
 report1.set_column_name("Comp_7", "tutu")
 
-report1.save_plot("report1.png",                                # picture name
-                  columns=["Exp", "carb", "titi", "tutu"],      # column to plot
-                  fill=True,                                    # fill component
-                  fname=False)                                  # do not write file name
+report1.save_plot("report1.png",                                        # picture name
+                  columns=["Exp", "carb", "titi", "tutu", "envelope"],  # column to plot
+                  fill=True,                                            # fill component
+                  fname=False)                                          # do not write file name

@@ -33,10 +33,10 @@ report1.set_column_name("Comp_5", "titi")
 report1.set_column_name("Comp_6", "toto")
 report1.set_column_name("Comp_7", "tutu")
 
-report1.save_plot("report1.png",                           # picture name
-                  columns=["Exp", "carb", "titi", "tutu"], # column to plot
-                  fill=True,                               # fill component
-                  fname=False)                             # do not write file name
+report1.save_plot("report1.png",                                        # picture name
+                  columns=["Exp", "carb", "titi", "tutu", "envelope"],  # column to plot
+                  fill=True,                                            # fill component
+                  fname=False)                                          # do not write file name
 ```
 
 this is the output on `report1.png` file :
@@ -54,13 +54,13 @@ stuff = xpsplot.StackedXPSData("report1.TXT", "report2.TXT", "report2.TXT")
 
 stuff.title = "C1s of a nice surface"
 
-# set column names from the first. If "", column name is keep unchanged
+# set column names. If "", column name is keep unchanged
 stuff.set_all_column_names("", "", "carb", "", "", "tata", "toto", "titi", "tutu")
 
-stuff.save_plot("stack.png",                               # picture name
-                columns=["Exp", "carb", "titi", "tutu"],   # column to plot
-                fill=True,                                 # fill component
-                pos=[284.5, 290.9, 286.5])                 # vertical line positions
+stuff.save_plot("stack.png",                                          # picture name
+                columns=["Exp", "carb", "titi", "tutu", "envelope"],  # column to plot
+                fill=True,                                            # fill component
+                pos=[284.5, 290.9, 286.5])                            # vertical line positions
 ```
 
 this is the output on `stack.png` file :
