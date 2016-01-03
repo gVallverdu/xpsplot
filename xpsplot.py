@@ -95,6 +95,22 @@ class XPSData(object):
             if new != "":
                 self.set_column_name(old, new)
 
+    def substract_bg(self, bg="BG"):
+        """
+        Substract background column to all data columns. If from_file was used
+        the background column is called 'BG'. A different column name can be
+        given as an optional argument.
+
+        Args:
+            bg (str): background column name, default is "BG"
+        """
+        if bg not in self.data.columns:
+            raise NameError("'{}' is not an existing column. ".format(bg) +
+                            "Try list_columns()")
+        bg_data = self.data[bg].copy()
+        for col in self.data.columns:
+            self.data[col] -= bg_data
+
     def get_plot(self, columns=None, fill=False, ax=None, xaxes=True,
                  legend=True, fname=True):
         """
@@ -135,7 +151,8 @@ class XPSData(object):
             else:
                 if fill and "BG" in self.data.columns:
                     ax.fill_between(self.data.index, self.data.BG,
-                                    self.data[col], alpha=ALPHA, color=color)
+                                    self.data[col], label=col, alpha=ALPHA,
+                                    color=color)
                 else:
                     ax.plot(self.data.index, self.data[col], linewidth=LINEWIDTH,
                             c=color, label=col)
@@ -272,6 +289,17 @@ class StackedXPSData(object):
             newname = input("{} => ".format(c))
             if newname.strip() != "":
                 self.set_column_name(c, newname)
+
+    def substract_bg(self, bg="BG"):
+        """
+        Substract the background column given as bg arguments to all data
+        columns in each xpsData object.
+
+        Args:
+            bg (string): name of the background column, default is "BG"
+        """
+        for xpsData in self.xpsData:
+            xpsData.substract_bg(bg)
 
     def get_plot(self, columns=None, fill=False, legend=True, fname=True, pos=[]):
         """
