@@ -51,9 +51,12 @@ class XPSData(object):
         self.filename = filename
         self._to_plot = []
 
-    def list_columns(self):
+    def list_columns(self, to_print=True):
         """ print names of component in data """
-        [print(c) for c in self.data.columns]
+        if to_print:
+            print("\n".join(self.data.columns))
+        else:
+            return self.data.columns.tolist()
 
     def set_columns_to_plot(self, *args):
         """ Set names of the columns to be present on the plot """
@@ -257,12 +260,15 @@ class StackedXPSData(object):
         """ Set names of the columns to be present on the plot """
         self._to_plot = args
 
-    def list_columns(self):
+    def list_columns(self, to_print=True):
         """ List all column names """
-        for xps in self.xpsData:
-            print("{} : {}".format(xps.title, xps.filename))
-            print(40 * "-")
-            print(" ; ".join([c for c in xps.data.columns]) + "\n")
+        if to_print:
+            for xps in self.xpsData:
+                print("{} : {}".format(xps.title, xps.filename))
+                print(40 * "-")
+                print(" ; ".join([c for c in xps.data.columns]) + "\n")
+        else:
+            return [xps.data.columns.tolist() for xps in self.xpsData]
 
     def set_column_name(self, oldname, newname):
         """
