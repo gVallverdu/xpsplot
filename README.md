@@ -13,6 +13,8 @@ another.
 * read_XPS_data.ipynb contains short examples of how to use xpsplot module
 * read_XPS_data_long.ipynb contains details on the implementation
 * report.TXT files are the data file in vms format
+* example3.py contains several examples of plots with customization options.
+* plot_example.py contains an example in order to build a custum plot
 
 Hereafter two simple examples of xps data graphical representation are shown.
 They correspond to the `example.py` and `example2.py` script files.

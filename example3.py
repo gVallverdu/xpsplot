@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" Stacking of several data files """
+""" Examples in order to customize plots """
 
 import xpsplot
 import matplotlib.pyplot as plt
