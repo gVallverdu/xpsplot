@@ -20,17 +20,20 @@ import re
 import os
 
 # plot parameters
-font = {'family': 'serif', 'size': 20}
+font = {'family': 'serif'}
 plt.rc('font', **font)
 
+# global options
 SIZE = (12, 8)
 XLABEL = "Bindig Energy (eV)"
 YLABEL = "CPS"
 GRID = False
 LINEWIDTH = 2
+FONTSIZE = 20
 ALPHA = .5
 COLORS = ["black", "red", "green", "blue", "violet", "orange",
           "cyan", "magenta", "indigo", "maroon", "turquoise"]
+
 # COLORS = ["#cc0000", "#3465a4",  "#f57900", "#c17d11", "#73d216", "#edd400", "#75507b"]
 # COLORS = ["black", "blue", "#f57900", "(.0, .6, .0)", "red"]
 
@@ -114,24 +117,45 @@ class XPSData(object):
         for col in self.data.columns:
             self.data[col] -= bg_data
 
+    def normalize(self, BE="Exp", method="minmax"):
+        """
+        Normalize data by dividing all components by the max value of the data.
+
+        Args:
+            BE (str): Column name to use in order to compute the normalization factor
+        """
+        if BE not in self.data.columns:
+            raise NameError("'{}' is not an existing column. ".format(BE) +
+                            "Try list_columns()")
+
+        minBE = self.data[BE].min()
+        maxBE = self.data[BE].max()
+
+        for col in self.data.columns:
+            self.data[col] = (self.data[col] - minBE) / (maxBE - minBE)
+
     def get_plot(self, columns=None, fill=False, ax=None, xaxes=True,
-                 legend=True, colors=COLORS, fname=True):
+                 legend=True, colors=COLORS, ylabel=None, frame=False,
+                 legend_kws={}):
         """
         Return a matplotlib plot of XPS data for the specified columns.
 
         Args:
             columns: list of column names to plot
-            fill: if True, component are filled
+            fill: if True, component are filled (default is False)
             ax: the current instance of a matplotlib Axes
-            xaxes: if True, the xaxis is drawn
-            legend: if True, the legend is present
-            colors: A list of colors as string, the first colors is used for envelpe
+            xaxes: if True, the xaxis is drawn (default is True)
+            legend: if True, the legend is present (default is Trye)
+            colors: A list of colors as string, the first color is used for enveloppe
                     and exp data
-            fname: if True, the name of the data file is written
+            ylabel: ylabel of the plot (default name of the data file)
+            frame: if True, the frame of the plot is drawn (default is False)
+            legend_kws: dict of parameters for the legend
 
         Returns:
             ax: a matplotlib axis object
         """
+
         # check column names
         if columns:
             for c in columns:
@@ -143,6 +167,7 @@ class XPSData(object):
         else:
             columns = self.data.columns
 
+        # set up axes
         if not ax:
             fig = plt.figure(figsize=SIZE)
             ax = fig.add_subplot(111)
@@ -173,36 +198,37 @@ class XPSData(object):
                 ic += 1
 
         # plot options :
-        #   * remove frame
-        ax.set_frame_on(False)
-        #   * remove y axis
-        if fname:
-            ax.set_yticks([])
-            ax.set_ylabel(self.filename, fontsize=10)
+        #   * remove frame and manage spines
+        # ax.set_frame_on(False)
+        [spine.set_linewidth(2) for spine in ax.spines.values()]
+        [ax.spines[k].set_visible(frame) for k in ["top", "left", "right"]]
+        #   * remove y ticks
+        ax.set_yticks([])
+        if ylabel:
+            ax.set_ylabel(ylabel, fontsize=FONTSIZE)
         else:
-            ax.get_yaxis().set_visible(False)
+            ax.set_ylabel(self.filename, fontsize=FONTSIZE)
         #   * revert x axes
         ax.set_xlim((self.data.index.max(), self.data.index.min()))
         #   * draw x axes
         if xaxes:
-            ymin, ymax = ax.get_ylim()
-            xmin, xmax = ax.get_xlim()
-            ax.set_xlabel(XLABEL)
+            ax.set_xlabel(XLABEL, fontsize=FONTSIZE)
+            ax.tick_params(width=2, labelsize=FONTSIZE)
             ax.get_xaxis().tick_bottom()
-            ax.add_line(matplotlib.lines.Line2D((xmin, xmax), (ymin, ymin),
-                                                color="black", linewidth=5.))
         else:
             ax.get_xaxis().set_visible(False)
+            ax.spines["bottom"].set_visible(False)
         #   * add grid
         ax.grid(GRID)
         #   * add legend
         if legend:
-            ax.legend()
+            ax.legend(fontsize=FONTSIZE, **legend_kws)
 
         return ax
 
     def save_plot(self, filename="plot.pdf", columns=None, fill=False,
-                  legend=True, fname=True, colors=COLORS):
+                  legend=True, ylabel=None, colors=COLORS, frame=False,
+                  legend_kws={}):
         """
         Save matplotlib plot to a file.
 
@@ -211,11 +237,15 @@ class XPSData(object):
             columns: list of column names to plot
             fill: if True, component are filled
             legend: if True, the legend is present
-            colors: A list of colors as string
-            fname: if True, the file name of the data is written
+            colors: A list of colors as string, the first color is used for the
+                    enveloppe and Exp data
+            ylabel: ylabel of the plot (default name of the data file)
+            frame: if True, the frame of the plot is drawn (default is False)
+            legend_kws: dict of parameters for the legend
         """
         ax = self.get_plot(columns=columns, fill=fill, legend=legend,
-                           fname=fname, colors=colors)
+                           ylabel=fname, colors=colors, frame=frame,
+                           legend_kws=legend_kws)
         plt.savefig(filename)
 
     @staticmethod
@@ -321,20 +351,34 @@ class StackedXPSData(object):
         for xpsData in self.xpsData:
             xpsData.substract_bg(bg)
 
-    def get_plot(self, columns=None, fill=False, legend=True, fname=True,
-                 pos=[], colors=COLORS):
+    def normalize(self, BE="Exp"):
+        """
+        Normalize data by dividing all components by the max value of the data.
+
+        Args:
+            BE (str): Column name to use in order to compute the normalization factor
+        """
+        for xpsData in self.xpsData:
+            xpsData.normalize(BE)
+
+    def get_plot(self, columns=None, fill=False, legend=True, ylabel=None,
+                 pos=[], colors=COLORS, legend_kws={}):
         """
         Return a matplotlib plot of all XPS data for the specified columns.
         XPS data are stacked with the first file at the top and the last
         file at the bottom.
 
+        The legend is added to the top axes.
+
         Args:
             columns: list of column names to plot
             fill: if True, component are filled
-            legend: if True, the legend is present
-            fname: if True, the name of the data file is written
-            colors: A list of colors as string
-            pos: list of x position of vertical lines
+            legend: if True, the legend is present on the top plot
+            ylabel: ylabel of the plot (default name of the data file)
+            colors: A list of colors as string, the fist color is used for the
+                    enveloppe and the Exp data.
+            pos: list of x position (in eV) of vertical lines if needed
+            legend_kws: dict of parameters for the legend
 
         Returns:
             fig: a matplotlib figure object
@@ -347,31 +391,37 @@ class StackedXPSData(object):
         fig.set_size_inches(SIZE[1], SIZE[0])
         fig.subplots_adjust(hspace=0)
 
+        # add plot using XPSData.get_plot to each subplots
         for axes, xps in zip(axis[:-1], self.xpsData[:-1]):
             xps.get_plot(columns, fill, ax=axes, xaxes=False, legend=False,
-                         fname=fname, colors=colors)
+                         ylabel=ylabel, colors=colors, frame=True)
+        # last plot with xaxis
         self.xpsData[-1].get_plot(columns, fill, ax=axis[-1], legend=False,
-                                  fname=fname, colors=colors)
+                                  ylabel=ylabel, colors=colors, frame=True)
 
         # the legend
         if legend:
-            axis[0].legend(loc='upper right', borderaxespad=0.,
-                           fontsize=18, bbox_to_anchor=(1.1, 1.3),)
+            axis[0].legend(fontsize=FONTSIZE, **legend_kws)
 
+        # figure title
         fig.suptitle(self.title)
 
-        for p in pos:
-            ymin = -(len(self.xpsData) - 1)
-            axis[0].axvline(x=p, ymin=-(len(self.xpsData) - 1), ymax=1.1, c="#555753",
-                            linewidth=2, clip_on=False)
-            ymin, ymax = axis[0].get_ylim()
-            axis[0].text(x=p, y=1.12 * ymax, s="{:5.1f}".format(p), fontsize=12,
-                         horizontalalignment='center')
+        # add vertical lines to a given position
+        for i, axes in enumerate(axis):
+            for p in pos:
+                ymin, ymax = axis[0].get_ylim()
+                axes.axvline(x=p, ymin=ymin, ymax=ymax, c="#555753",
+                             linewidth=2, clip_on=True)
+                if i == 0:
+                    axes.text(x=p, y=ymax, s="{:5.1f}".format(p),
+                              fontsize=FONTSIZE / 1.5,
+                              verticalalignment="bottom",
+                              horizontalalignment='center')
 
         return fig
 
     def save_plot(self, filename="plot.pdf", columns=None, fill=False, legend=True,
-                  fname=True, pos=[], colors=COLORS):
+                  ylabel=None, pos=[], colors=COLORS, legend_kws={}):
         """
         Save matplotlib plot to a file.
 
@@ -379,11 +429,13 @@ class StackedXPSData(object):
             filename: Filename to write to.
             columns: list of column names to plot
             fill: if True, component are filled
-            fname: if True, the name of the data file is written
+            legend: if True, the legend is present on the top plot
+            ylabel: ylabel of the plot (default name of the data file)
             colors: A list of colors as string
-            pos: list of x position of vertical lines
+            pos: list of x position (in eV) of vertical lines if needed.
+            legend_kws: dict of parameters for the legend
         """
-        fig = self.get_plot(columns, fill, legend, fname, pos, colors)
+        fig = self.get_plot(columns, fill, legend, ylabel, pos, colors, legend_kws)
         fig.savefig(filename)
 
     def __str__(self):
