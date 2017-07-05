@@ -115,7 +115,7 @@ class XPSData(object):
             self.data[col] -= bg_data
 
     def get_plot(self, columns=None, fill=False, ax=None, xaxes=True,
-                 legend=True, fname=True):
+                 legend=True, colors=COLORS, fname=True):
         """
         Return a matplotlib plot of XPS data for the specified columns.
 
@@ -125,7 +125,12 @@ class XPSData(object):
             ax: the current instance of a matplotlib Axes
             xaxes: if True, the xaxis is drawn
             legend: if True, the legend is present
+            colors: A list of colors as string, the first colors is used for envelpe
+                    and exp data
             fname: if True, the name of the data file is written
+
+        Returns:
+            ax: a matplotlib axis object
         """
         # check column names
         if columns:
@@ -142,16 +147,22 @@ class XPSData(object):
             fig = plt.figure(figsize=SIZE)
             ax = fig.add_subplot(111)
 
+        # manage colors : first is for enveloppe and exp data
+        #                 following colors for components
+        first_color = colors[0]
+        used_colors = colors[1:]
+
         # add plots
-        for i, col in enumerate(columns):
-            color = COLORS[i % len(COLORS)]
+        ic = 0
+        for col in columns:
             if col == "envelope":
                 ax.plot(self.data.index, self.data.envelope,
-                        linewidth=1, c="black", label="")
+                        linewidth=1, c=first_color, label="")
             elif col == "Exp":
-                ax.plot(self.data.index, self.data.Exp, c="black", linestyle="",
+                ax.plot(self.data.index, self.data.Exp, c=first_color, linestyle="",
                         label="Exp", marker="o", markersize=4.)
             else:
+                color = used_colors[ic % len(used_colors)]
                 if fill and "BG" in self.data.columns:
                     ax.fill_between(self.data.index, self.data.BG,
                                     self.data[col], label=col, alpha=ALPHA,
@@ -159,6 +170,7 @@ class XPSData(object):
                 else:
                     ax.plot(self.data.index, self.data[col], linewidth=LINEWIDTH,
                             c=color, label=col)
+                ic += 1
 
         # plot options :
         #   * remove frame
@@ -190,7 +202,7 @@ class XPSData(object):
         return ax
 
     def save_plot(self, filename="plot.pdf", columns=None, fill=False,
-                  legend=True, fname=True):
+                  legend=True, fname=True, colors=COLORS):
         """
         Save matplotlib plot to a file.
 
@@ -199,9 +211,11 @@ class XPSData(object):
             columns: list of column names to plot
             fill: if True, component are filled
             legend: if True, the legend is present
+            colors: A list of colors as string
             fname: if True, the file name of the data is written
         """
-        ax = self.get_plot(columns=columns, fill=fill, legend=legend, fname=fname)
+        ax = self.get_plot(columns=columns, fill=fill, legend=legend,
+                           fname=fname, colors=colors)
         plt.savefig(filename)
 
     @staticmethod
@@ -307,7 +321,8 @@ class StackedXPSData(object):
         for xpsData in self.xpsData:
             xpsData.substract_bg(bg)
 
-    def get_plot(self, columns=None, fill=False, legend=True, fname=True, pos=[]):
+    def get_plot(self, columns=None, fill=False, legend=True, fname=True,
+                 pos=[], colors=COLORS):
         """
         Return a matplotlib plot of all XPS data for the specified columns.
         XPS data are stacked with the first file at the top and the last
@@ -318,7 +333,11 @@ class StackedXPSData(object):
             fill: if True, component are filled
             legend: if True, the legend is present
             fname: if True, the name of the data file is written
+            colors: A list of colors as string
             pos: list of x position of vertical lines
+
+        Returns:
+            fig: a matplotlib figure object
         """
         if self._to_plot:
             columns = self._to_plot
@@ -329,8 +348,10 @@ class StackedXPSData(object):
         fig.subplots_adjust(hspace=0)
 
         for axes, xps in zip(axis[:-1], self.xpsData[:-1]):
-            xps.get_plot(columns, fill, ax=axes, xaxes=False, legend=False, fname=fname)
-        self.xpsData[-1].get_plot(columns, fill, ax=axis[-1], legend=False, fname=fname)
+            xps.get_plot(columns, fill, ax=axes, xaxes=False, legend=False,
+                         fname=fname, colors=colors)
+        self.xpsData[-1].get_plot(columns, fill, ax=axis[-1], legend=False,
+                                  fname=fname, colors=colors)
 
         # the legend
         if legend:
@@ -350,7 +371,7 @@ class StackedXPSData(object):
         return fig
 
     def save_plot(self, filename="plot.pdf", columns=None, fill=False, legend=True,
-                  fname=True, pos=[]):
+                  fname=True, pos=[], colors=COLORS):
         """
         Save matplotlib plot to a file.
 
@@ -359,10 +380,11 @@ class StackedXPSData(object):
             columns: list of column names to plot
             fill: if True, component are filled
             fname: if True, the name of the data file is written
+            colors: A list of colors as string
             pos: list of x position of vertical lines
         """
-        ax = self.get_plot(columns, fill, legend, fname, pos)
-        plt.savefig(filename)
+        fig = self.get_plot(columns, fill, legend, fname, pos, colors)
+        fig.savefig(filename)
 
     def __str__(self):
         line = self.title + "\n" + 30 * "-" + "\n"
